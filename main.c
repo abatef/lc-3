@@ -22,6 +22,13 @@ enum {
 /* Register Storage */
 uint16_t reg[R_COUNT];
 
+/* Condition Flags */
+enum {
+    FL_POS = 1 << 0,  /* POSITIVE */
+    FL_ZER = 1 << 1,  /* ZERO */
+    FL_NEG = 1 << 2   /* NEGATIVE */
+};
+
 /* Opcodes */
 enum {
     OP_BR = 0, /* branch */
@@ -40,12 +47,5 @@ enum {
     OP_RES,    /* reserved */
     OP_LEA,    /* load effective address */
     OP_TRP     /* trap */
-};
-
-/* Condition Flags */
-enum {
-    FL_POS = 1 << 0,  /* POSITIVE */
-    FL_ZER = 1 << 1,  /* ZERO */
-    FL_NEG = 1 << 2   /* NEGATIVE */
 };
 
