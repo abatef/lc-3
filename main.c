@@ -33,25 +33,40 @@ enum {
 
 /* Opcodes */
 enum {
-    OP_BR = 0, /* branch */
-    OP_ADD,    /* add */
-    OP_LD,     /* load */
-    OP_ST,     /* store */
-    OP_JSR,    /* jump register */
-    OP_AND,    /* bitwise AND */
-    OP_NOT,    /* bitwise NOT */
-    OP_LDR,    /* load register */
-    OP_STR,    /* store register */
-    OP_RTI,    /* unused */
-    OP_LDI,    /* load indirect */
-    OP_STI,    /* store indirect */
-    OP_JMP,    /* jump */
-    OP_RES,    /* reserved */
-    OP_LEA,    /* load effective address */
-    OP_TRP     /* trap */
+    OP_BR  = 0x0,    /* branch */
+    OP_ADD = 0x1,    /* add */
+    OP_LD  = 0x2,    /* load */
+    OP_ST  = 0x3,    /* store */
+    OP_JSR = 0x4,    /* jump register */
+    OP_AND = 0x5,    /* bitwise AND */
+    OP_LDR = 0x6,    /* load register */
+    OP_STR = 0x7,    /* store register */
+    OP_RTI = 0x8,    /* unused */
+    OP_NOT = 0x9,    /* bitwise NOT */
+    OP_LDI = 0xA,    /* load indirect */
+    OP_STI = 0xB,    /* store indirect */
+    OP_JMP = 0xC,    /* jump */
+    OP_RES = 0xD,    /* reserved */
+    OP_LEA = 0xE,    /* load effective address */
+    OP_TRP = 0xF     /* trap */
 };
 
 uint16_t mem_read(uint16_t inst);
+uint16_t sign_extend(uint16_t x, int bit_count) {
+    if ((x >> (bit_count - 1)) & 1) {
+        x |= (0xFFFF << bit_count);
+    }
+    return x;
+}
+uint16_t update_flags(uint16_t r) {
+    if (reg[r] == 0) {
+        reg[R_COND] = FL_ZER;
+    } else if (reg[r] >> 15) {
+        reg[R_COND] == FL_NEG;
+    } else {
+        reg[R_COND] == FL_POS;
+    }
+}
 
 bool read_image(char *string);
 
@@ -80,6 +95,19 @@ int main(int argc, char *argv[]) {
         switch (op) {
             case OP_ADD:
                 /* ADD */
+            {
+                    uint16_t DR = (inst >> 9) & 0x7;
+                    uint16_t SR1 = (inst >> 6) & 0x7;
+                    uint16_t IMM_FL = (inst >> 5) & 0x1;
+                    if (IMM_FL) {
+                        uint16_t IMM = sign_extend(inst & 0x1f, 5);
+                        reg[DR] = reg[SR1] + IMM;
+                    } else {
+                        uint16_t SR2 = (inst & 0x7);
+                        reg[DR] = reg[SR1] + reg[SR2];
+                    }
+                update_flags(DR);
+            }
             case OP_AND:
                 /* AND */
             case OP_BR:
@@ -94,6 +122,9 @@ int main(int argc, char *argv[]) {
                 /* LOAD */
             case OP_LDI:
                 /* LOAD INDIRECT */
+            {
+
+            }
             case OP_LDR:
                 /* LOAD REGISTER */
             case OP_LEA:
